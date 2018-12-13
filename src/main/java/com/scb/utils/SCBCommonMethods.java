@@ -6,15 +6,18 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Random;
 
 import org.springframework.stereotype.Component;
 
+import com.scb.model.AuditLog;
 import com.scb.model.BalanceEnquiry;
 import com.scb.model.BalanceEnquiryRequest;
 import com.scb.model.BalanceEnquiryResponse;
 import com.scb.model.MsAuditLog;
 import com.scb.model.MsErrorLog;
+import com.scb.model.OutwardBalanceEnquiry;
 import com.scb.model.ResponseMessage;
 
 @Component
@@ -147,5 +150,16 @@ public class SCBCommonMethods {
 		MsErrorLog errorLog = MsErrorLog.builder().errorMessage(e.getMessage()).msComponent("Router").stackTrace(toByteArray(e)).build();
 		
 		return errorLog;
+	}
+	
+	public AuditLog getAuditLog(OutwardBalanceEnquiry balanceEnquiry, String status, String message) {
+		return AuditLog.builder().transactionType(balanceEnquiry.getTransactionType())
+				.transactionSubType(balanceEnquiry.getTransactionSubType())
+				.transactionId(balanceEnquiry.getTransactionID())
+				.serviceName("AccountBalanceEnquiryService")
+				.messageType(balanceEnquiry.getPayloadFormat())
+				.status(status)
+				.message(message)
+				.timestamp(new Date()).build();
 	}
 }

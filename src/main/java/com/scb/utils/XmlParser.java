@@ -13,7 +13,6 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -24,8 +23,6 @@ import org.xml.sax.SAXException;
 import com.scb.model.OutwardBalanceEnquiry;
 
 public class XmlParser implements RequestParser {
-	@Autowired
-	private SCBCommonMethods commonMethods;
 
 	@Override
 	public OutwardBalanceEnquiry parse(Object request) {
@@ -33,7 +30,6 @@ public class XmlParser implements RequestParser {
 		OutwardBalanceEnquiry balanceEnquiry = null;
 		
 		try {
-	         //File inputFile = new File("input.txt");
 	         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 	         DocumentBuilder dBuilder;
 
@@ -111,32 +107,10 @@ public class XmlParser implements RequestParser {
 	            }
 	         }
 
-	         //extract payloadFormat
-	  //       NodeList payloadFormatList = (NodeList) xPath.compile(payloadFormatExp).evaluate(doc, XPathConstants.NODESET);
 	         String payloadFormat = "XML";
 	         
-//	         if(payloadFormatList.getLength() > 0) {
-//	        	 Node nNode = payloadFormatList.item(0);
-//	            System.out.println("\npayloadFormatList - Current Element :" + nNode.getNodeName());
-//	            
-//	            if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-//		               Element eElement = (Element) nNode;
-//		               System.out.println("Payload Format [" + 0 + "] : "
-//		 	                  + nNode.getTextContent());
-//		               payloadFormat = nNode.getTextContent();
-//	            }
-//	         }
-	         
-	         if (countryCode.equalsIgnoreCase("IN")) {
-	        	 countryCode = "Ind";
-	         } else if(countryCode.equalsIgnoreCase("US")) {
-	        	 countryCode = "Usa";
-	         } else if (countryCode.equalsIgnoreCase("GR")) {
-	        	 countryCode = "Ger";
-	         }
-	         
-	         balanceEnquiry = OutwardBalanceEnquiry.builder().transactionID(getTransactionId()).transactionType("OutwardCreditTransfer")
-	        		 .transactionType("OutwardCreditTransfer")
+	         balanceEnquiry = OutwardBalanceEnquiry.builder().transactionID(getTransactionId())
+	        		 .transactionType("AccountBalanceEnquiry")
 	        		 .transactionSubType(countryCode)
 	        		 .payloadFormat(payloadFormat)
 	        		 .sourceSystem(sourceSystem)
@@ -145,41 +119,6 @@ public class XmlParser implements RequestParser {
 	        		 .createdOn(getCurrentDateTime())
 	        		 .updatedOn(getCurrentDateTime()).build();
 	        		 
-	         //System.out.println("OutwardBalanceEnquiry : " + balanceEnquiry.toString());
-	        
-//	         String expression = "/class/student";	        
-//	         NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(
-//	            doc, XPathConstants.NODESET);
-//
-//	         for (int i = 0; i < nodeList.getLength(); i++) {
-//	            Node nNode = nodeList.item(i);
-//	            System.out.println("\nCurrent Element :" + nNode.getNodeName());
-//	            
-//	            if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-//	               Element eElement = (Element) nNode;
-//	               System.out.println("Student roll no :" + eElement.getAttribute("rollno"));
-//	               System.out.println("First Name : " 
-//	                  + eElement
-//	                  .getElementsByTagName("firstname")
-//	                  .item(0)
-//	                  .getTextContent());
-//	               System.out.println("Last Name : " 
-//	                  + eElement
-//	                  .getElementsByTagName("lastname")
-//	                  .item(0)
-//	                  .getTextContent());
-//	               System.out.println("Nick Name : " 
-//	                  + eElement
-//	                  .getElementsByTagName("nickname")
-//	                  .item(0)
-//	                  .getTextContent());
-//	               System.out.println("Marks : " 
-//	                  + eElement
-//	                  .getElementsByTagName("marks")
-//	                  .item(0)
-//	                  .getTextContent());
-//	            }
-//	         }
 	      } catch (ParserConfigurationException e) {
 	         e.printStackTrace();
 	      } catch (SAXException e) {

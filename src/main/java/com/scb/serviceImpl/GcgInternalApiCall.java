@@ -13,6 +13,7 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.scb.config.BalanceEnquiryConfig;
+import com.scb.model.AuditLog;
 import com.scb.model.BalanceEnquiry;
 import com.scb.model.BalanceEnquiryResponse;
 import com.scb.model.BalanceEnquiryValidateResponse;
@@ -38,7 +39,7 @@ public class GcgInternalApiCall {
 	private SCBCommonMethods commonMethods;
 	
 	public ResponseEntity<BalanceEnquiryResponse> persistenceServiceApiCall(PersistanceData persistanceData) {
-		log.info("OutwardBalanceEnquiry in persistence service: " + persistanceData);
+		//log.info("OutwardBalanceEnquiry in persistence service: " + persistanceData);
 		ResponseEntity<BalanceEnquiryResponse> persistenceServiceApi = null;
 		ResponseEntity<ResponseMessage> reponseMessage = null;
 		try {
@@ -79,7 +80,7 @@ public class GcgInternalApiCall {
 	}
 
 	public ResponseEntity<BalanceEnquiryResponse> serviceApiCall(RequestData requestData, String serviceURL) {
-		log.info("RequestData in serviceApiCall: " + requestData);
+		//log.info("RequestData in serviceApiCall: " + requestData);
 		log.info("RequestData in serviceURL: " + serviceURL);
 		ResponseEntity<BalanceEnquiryResponse> serviceApiResponse = null;
 		ResponseEntity<ResponseMessage> reponseMessage = null;
@@ -117,7 +118,7 @@ public class GcgInternalApiCall {
 	}
 
 	public ResponseEntity<ResponseMessage> configServiceApiCall(RequestData requestData, String serviceURL) {
-		log.info("RequestData in serviceApiCall: " + requestData);
+		//log.info("RequestData in serviceApiCall: " + requestData);
 		log.info("RequestData in serviceURL: " + serviceURL);
 		ResponseEntity<List<ProcessFlowSequence>> serviceApiResponse = null;
 		ResponseEntity<ResponseMessage> reponseMessage = null;
@@ -300,4 +301,30 @@ public class GcgInternalApiCall {
 	//	return new  ResponseEntity<CustomerResponse>(commonMethods.getSuccessResponse(responseOfCustomerApi.getBody().getCustomerRequestData()), HttpStatus.OK);
 	}
 
+	public ResponseEntity<AuditLog> auditLogApiCall(AuditLog auditLog) {
+		ResponseEntity<AuditLog> responseAuditLog = null;
+		try {
+			log.debug("AuditLogService call...");
+			HttpEntity<AuditLog> entity = new HttpEntity<AuditLog>(auditLog);
+			responseAuditLog = restTemplate.exchange(customerConfig.getAuditLogServiceURL(), HttpMethod.POST, entity,
+					AuditLog.class);
+		} catch (HttpClientErrorException | HttpServerErrorException httpClientOrServerEx) {
+			MsErrorLog msErrorLog = commonMethods.getErrorLogDetails(httpClientOrServerEx);
+			msErrorLog.setErrorCode(httpClientOrServerEx.getStatusCode().toString());
+			//msErrorLog.setUuid(auditLog.getUuid());
+			msErrorLog.setTimeStamp(auditLog.getTimestamp().toString());
+			if (HttpStatus.INTERNAL_SERVER_ERROR.equals(httpClientOrServerEx.getStatusCode())) {
+				msErrorLogApiCall(msErrorLog);
+				// retry logic goes here
+			} else {
+				// do something
+			}
+		} catch (Exception e) {
+			MsErrorLog msErrorLog = commonMethods.getErrorLogDetails(e);
+			//msErrorLog.setUuid(auditLog.getUuid());
+			msErrorLog.setTimeStamp(auditLog.getTimestamp().toString());
+			msErrorLogApiCall(msErrorLog);
+		}
+		return responseAuditLog;
+	}	
 }
